@@ -1,0 +1,58 @@
+<% layout("/layouts/boilerplate") %>
+<h5 class="mt-4">🧾 Guest Details (Submitted by User)</h5>
+
+<% if (booking.guestDetails) { %>
+  <ul class="list-group">
+
+    <li class="list-group-item">
+      <strong>Full Name:</strong>
+      <%= booking.guestDetails.fullName %>
+    </li>
+
+    <li class="list-group-item">
+      <strong>Email:</strong>
+      <%= booking.guestDetails.email %>
+    </li>
+
+    <li class="list-group-item">
+      <strong>Phone:</strong>
+      <%= booking.guestDetails.phone %>
+    </li>
+
+    <li class="list-group-item">
+      <strong>Guests:</strong>
+      Adults: <%= booking.guestDetails.adults %>,
+      Children: <%= booking.guestDetails.children %>
+    </li>
+
+    <li class="list-group-item">
+      <strong>Room Type:</strong>
+      <%= booking.guestDetails.roomType  || "None"%>
+    </li>
+
+    <li class="list-group-item">
+      <strong>Floor:</strong>
+      <%= booking.guestDetails.floor  || "None"%>
+    </li>
+
+    <li class="list-group-item">
+      <strong>View:</strong>
+      <%= booking.guestDetails.view  || "None"%>
+    </li>
+
+    <li class="list-group-item">
+      <strong>Special Requests:</strong>
+      <%= booking.guestDetails.specialRequests || "None" %>
+    </li>
+  
+
+    <li class="list-group-item">
+      <strong>Payment Method:</strong>
+      <%= booking.payment.method|| "None" %>
+    </li>
+  </ul>
+
+
+<% } else { %>
+  <p class="text-muted">No guest details submitted yet.</p>
+<% } %>

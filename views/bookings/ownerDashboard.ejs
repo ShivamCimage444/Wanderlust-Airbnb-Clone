@@ -1,0 +1,320 @@
+<% layout("/layouts/boilerplate") %>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+<style>
+body {
+  background: #f4f6fb;
+  font-family: 'Inter', sans-serif;
+}
+
+/* ===== SIDEBAR ===== */
+.sidebar {
+  position: fixed;
+  left: 0;
+  top: 0;
+  width: 240px;
+  height: 100vh;
+  background: #111827;
+  padding: 20px;
+  color: white;
+}
+
+.sidebar h4 {
+  margin-bottom: 30px;
+}
+
+.sidebar a {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px;
+  border-radius: 10px;
+  color: #9ca3af;
+  text-decoration: none;
+  margin-bottom: 10px;
+}
+
+.sidebar a:hover,
+.sidebar a.active {
+  background: #374151;
+  color: white;
+}
+
+/* ===== MAIN ===== */
+.main {
+  margin-left: 260px;
+  padding: 30px;
+}
+
+/* ===== KPI ===== */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit,minmax(220px,1fr));
+  gap: 20px;
+}
+
+.kpi {
+  background: white;
+  padding: 20px;
+  border-radius: 15px;
+  box-shadow: 0 8px 20px rgba(0,0,0,.05);
+  text-align: center;
+  transition: .3s;
+}
+
+.kpi:hover {
+  transform: translateY(-5px);
+}
+
+/* ===== CARD ===== */
+.card {
+  background: white;
+  padding: 20px;
+  border-radius: 15px;
+  box-shadow: 0 8px 20px rgba(0,0,0,.05);
+  transition: .3s;
+}
+
+.card:hover {
+  transform: translateY(-3px);
+}
+
+/* ===== LISTING CARD ===== */
+.listing-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit,minmax(250px,1fr));
+  gap: 20px;
+}
+
+.listing-card {
+  background: linear-gradient(135deg,#6366f1,#8b5cf6);
+  color: white;
+  padding: 20px;
+  border-radius: 15px;
+  transition: 0.3s;
+}
+
+.listing-card:hover {
+  transform: translateY(-5px);
+}
+
+/* ===== BADGE ===== */
+.badge-box {
+  background: #10b981;
+  padding: 5px 10px;
+  border-radius: 50px;
+  font-size: 12px;
+}
+</style>
+
+<!-- ===== SIDEBAR ===== -->
+<div class="sidebar">
+  <h4>Owner Panel</h4>
+
+  <a href="/bookings/owner/dashboard" class="active">
+    <i class="fa fa-chart-line"></i> Dashboard
+  </a>
+
+  <a href="/bookings/owner/mylistings">
+    <i class="fa fa-home"></i> Listings
+  </a>
+
+  <a href="/bookings/owner/pending">
+    <i class="fa fa-clock"></i> Pending
+  </a>
+
+  <a href="/bookings/owner/confirmed">
+    <i class="fa fa-check"></i> Confirmed
+  </a>
+
+  <a href="/bookings/owner/cancelled">
+    <i class="fa fa-times"></i> Cancelled
+  </a>
+
+  <a href="/logout">
+    <i class="fa fa-sign-out-alt"></i> Logout
+  </a>
+</div>
+
+<!-- ===== MAIN ===== -->
+<div class="main">
+
+<h2 class="mb-4">📊 Owner Dashboard</h2>
+
+<!-- ===== FILTER ===== -->
+<div class="card mb-4">
+  <form method="GET" class="row g-3">
+
+    <div class="col-md-4">
+      <select name="month" class="form-select">
+        <option value="all">All Months</option>
+        <% for(let i=0;i<12;i++){ %>
+          <option value="<%= i %>" <%= selectedMonth == i ? "selected":"" %>>
+            <%= ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"][i] %>
+          </option>
+        <% } %>
+      </select>
+    </div>
+
+    <div class="col-md-4">
+      <select name="year" class="form-select">
+        <% for(let y=2023; y<=new Date().getFullYear()+1; y++){ %>
+          <option value="<%= y %>" <%= selectedYear == y ? "selected":"" %>>
+            <%= y %>
+          </option>
+        <% } %>
+      </select>
+    </div>
+
+    <div class="col-md-4">
+      <button class="btn btn-dark w-100">Apply Filter</button>
+    </div>
+
+  </form>
+</div>
+
+<!-- ===== BEST MONTH ===== -->
+<div class="card mb-4 text-center">
+  <h5>📊 Best Performing Month</h5>
+
+  <% if (bestMonth && bestMonth.revenue > 0) { %>
+    <h3 class="text-success"><%= bestMonth.name %></h3>
+    <p>Revenue: ₹ <%= bestMonth.revenue.toLocaleString() %></p>
+  <% } else { %>
+    <p class="text-muted">No data available</p>
+  <% } %>
+</div>
+
+
+
+<!-- ===== KPI ===== -->
+<div class="grid mb-4">
+  <div class="kpi">
+    <h6>Today</h6>
+    <h3>₹ <%= dailyRevenue.toLocaleString() %></h3>
+  </div>
+
+  <div class="kpi">
+    <h6>This Week</h6>
+    <h3>₹ <%= weeklyRevenue.toLocaleString() %></h3>
+  </div>
+
+  <div class="kpi">
+    <h6>This Month</h6>
+    <h3>₹ <%= monthlyRevenue.toLocaleString() %></h3>
+  </div>
+
+  <div class="kpi">
+    <h6>Total</h6>
+    <h3>₹ <%= totalEarning.toLocaleString() %></h3>
+  </div>
+</div>
+
+<!-- ===== PROFIT CARD ===== -->
+<div class="grid mb-4">
+  <div class="card text-center">
+    <h6>Total Profit</h6>
+    <h3>₹ <%= totalProfit.toLocaleString() %></h3>
+  </div>
+
+  <div class="card">
+  <h6>Admin Earnings</h6>
+  <h3>₹ <%= totalCommission.toLocaleString() %></h3>
+</div>
+
+<div class="card mb-4 text-center">
+  <h6>Platform Commission</h6>
+  <h4><%= currentCommissionRate %>%</h4>
+</div>
+
+  <div class="card text-center">
+    <h6>Total Expense</h6>
+    <h3>₹ <%= totalExpense.toLocaleString() %></h3>
+  </div>
+
+  
+</div>
+
+<!-- ===== CHARTS ===== -->
+<div class="row g-4 mb-4">
+
+  <div class="col-md-8">
+    <div class="card">
+      <h5>📈 Monthly Revenue Trend</h5>
+      <canvas id="barChart"></canvas>
+    </div>
+  </div>
+
+  <div class="col-md-4">
+    <div class="card text-center">
+      <h5>Profit vs Expense</h5>
+      <canvas id="pieChart"></canvas>
+    </div>
+  </div>
+
+</div>
+
+<!-- ===== TOP LISTINGS ===== -->
+<div class="card mb-4">
+  <h5>🏆 Top 5 Listings</h5>
+
+  <% if (topListings.length > 0) { %>
+    <div class="listing-grid">
+      <% topListings.forEach(l => { %>
+        <div class="listing-card">
+          <h5><%= l.title %></h5>
+          <p>Revenue</p>
+          <h4>₹ <%= l.total.toLocaleString() %></h4>
+          <span class="badge-box">Top Performer</span>
+        </div>
+      <% }) %>
+    </div>
+  <% } else { %>
+    <p class="text-muted">No data available</p>
+  <% } %>
+</div>
+
+<!-- ===== BOOKINGS SUMMARY ===== -->
+<div class="grid">
+  <div class="card text-center">
+    <h6>Pending</h6>
+    <h3><%= pendingBookings ? pendingBookings.length : 0 %></h3>
+  </div>
+
+  <div class="card text-center">
+    <h6>Confirmed</h6>
+    <h3><%= confirmedBookings ? confirmedBookings.length : 0 %></h3>
+  </div>
+</div>
+
+</div>
+
+<!-- ===== CHART SCRIPT ===== -->
+<script>
+new Chart(document.getElementById("barChart"), {
+  type: "bar",
+  data: {
+    labels: <%- JSON.stringify(chartLabels) %>,
+    datasets: [{
+      label: "Revenue",
+      data: <%- JSON.stringify(chartData) %>,
+      borderWidth: 2
+    }]
+  }
+});
+
+new Chart(document.getElementById("pieChart"), {
+  type: "doughnut",
+  data: {
+    labels: ["Profit", "Expense"],
+    datasets: [{
+      data: [
+        <%= totalProfit > 0 ? totalProfit : 0 %>,
+        <%= totalExpense > 0 ? totalExpense : 0 %>
+      ]
+    }]
+  }
+});
+</script>

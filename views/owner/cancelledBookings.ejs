@@ -1,0 +1,219 @@
+<% layout("/layouts/boilerplate") %>
+
+<style>
+  body {
+    background: #f5f7fb;
+  }
+
+  .page-title {
+    font-weight: 700;
+    background: linear-gradient(90deg, #7c3aed, #2563eb);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .card-wrapper {
+    background: #ffffff;
+    border-radius: 16px;
+    padding: 25px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+  }
+
+  .custom-table thead {
+    background: linear-gradient(90deg, #1e293b, #0f172a);
+    color: #fff;
+  }
+
+  .custom-table th {
+    font-weight: 500;
+    font-size: 14px;
+    padding: 14px;
+  }
+
+  .custom-table td {
+    padding: 16px 14px;
+    font-size: 14px;
+    vertical-align: middle;
+  }
+
+  .custom-table tbody tr {
+    transition: 0.2s ease;
+  }
+
+  .custom-table tbody tr:hover {
+    background: #f1f5f9;
+  }
+
+  .price-text {
+    color: #2563eb;
+    font-weight: 600;
+  }
+
+  .badge-owner {
+    background: #dc2626;
+  }
+
+  .badge-user {
+    background: #facc15;
+    color: #000;
+  }
+
+  .reason-text {
+    max-width: 220px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .btn-view {
+    border-radius: 8px;
+    font-size: 13px;
+    padding: 5px 12px;
+  }
+
+  .pagination .page-link {
+    border-radius: 8px;
+    margin: 0 4px;
+    color: #1e293b;
+  }
+
+  .pagination .active .page-link {
+    background: #7c3aed;
+    border-color: #7c3aed;
+  }
+
+  .empty-box {
+    background: #fff;
+    padding: 40px;
+    text-align: center;
+    border-radius: 16px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+  }
+</style>
+
+<div class="container mt-5">
+
+  <h2 class="mb-4 page-title">Cancelled Bookings</h2>
+
+  <% if (bookings.length === 0) { %>
+
+    <div class="empty-box">
+      <h5 class="text-muted">No cancelled bookings found.</h5>
+    </div>
+
+  <% } else { %>
+
+    <div class="card-wrapper">
+
+      <div class="table-responsive">
+        <table class="table custom-table align-middle">
+          <thead>
+            <tr>
+              <th>Listing</th>
+              <th>User</th>
+              <th>Dates</th>
+              <th>Cancelled By</th>
+              <th>Reason</th>
+              <th>Cancelled On</th>
+              <th>Details</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            <% bookings.forEach(booking => { %>
+              <tr>
+
+                <!-- Listing -->
+                <td>
+                  <strong><%= booking.listing.title %></strong><br>
+                  <span class="price-text">
+                    ₹<%= booking.listing.price.toLocaleString("en-IN") %>/night
+                  </span>
+                </td>
+
+                <!-- User -->
+               <td>
+  <%= booking.user?.username || booking.user?.email || "Deleted User" %><br>
+  <small class="text-muted">
+    <%= booking.user?.email || "" %>
+  </small>
+</td>
+                <!-- Dates -->
+                <td>
+                  <%= booking.startDate.toDateString() %><br>
+                  → <%= booking.endDate.toDateString() %>
+                </td>
+
+                <!-- Cancelled By -->
+                <td>
+                  <% if (booking.cancelledBy === "owner") { %>
+                    <span class="badge badge-owner">Owner</span>
+                  <% } else { %>
+                    <span class="badge badge-user">User</span>
+                  <% } %>
+                </td>
+
+                <!-- Reason -->
+                <td class="reason-text">
+                  <%= booking.cancelReason || "No reason provided" %>
+                </td>
+
+                <!-- Date -->
+                <td>
+                  <%= booking.completedAt
+                    ? booking.completedAt.toLocaleDateString()
+                    : "-" %>
+                </td>
+
+                <!-- Details -->
+                <td>
+                  <a
+                    href="/bookings/owner/<%= booking._id %>/details"
+                    class="btn btn-sm btn-outline-primary btn-view"
+                  >
+                    View
+                  </a>
+                </td>
+
+              </tr>
+            <% }) %>
+          </tbody>
+        </table>
+      </div>
+
+    </div>
+
+  <% } %>
+</div>
+
+
+<% if (totalPages > 1) { %>
+  <nav class="mt-4">
+    <ul class="pagination justify-content-center">
+
+      <li class="page-item <%= currentPage === 1 ? 'disabled' : '' %>">
+        <a class="page-link"
+           href="/bookings/owner/cancelled?page=<%= currentPage - 1 %>">
+          Previous
+        </a>
+      </li>
+
+      <% for (let i = 1; i <= totalPages; i++) { %>
+        <li class="page-item <%= currentPage === i ? 'active' : '' %>">
+          <a class="page-link"
+             href="/bookings/owner/cancelled?page=<%= i %>">
+            <%= i %>
+          </a>
+        </li>
+      <% } %>
+
+      <li class="page-item <%= currentPage === totalPages ? 'disabled' : '' %>">
+        <a class="page-link"
+           href="/bookings/owner/cancelled?page=<%= currentPage + 1 %>">
+          Next
+        </a>
+      </li>
+
+    </ul>
+  </nav>
+<% } %>

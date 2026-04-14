@@ -1,0 +1,158 @@
+<% layout("/layouts/boilerplate") %>
+
+<body>
+
+  <% if (currentUser?.isBlocked) { %>
+    <div class="alert alert-danger text-center">
+      Your account is blocked. Actions are disabled.
+    </div>
+  <% } %>
+
+  <!-- Heading -->
+  <h1 class="mb-4 text-center">
+  <!-- Welcome to <span>Wanderlust</span>--> 
+  </h1>
+
+  <!-- 🔍 SEARCH BAR -->
+  <form action="/listings" method="GET" class="mb-4 d-flex justify-content-center">
+    <input 
+      type="text" 
+      name="search" 
+      placeholder="Search by location..." 
+      class="form-control w-50 rounded-start-pill px-4"
+      value="<%= searchQuery || '' %>"
+    >
+    <button class="btn btn-dark rounded-end-pill px-4">Search</button>
+  </form>
+
+  <!-- 🏷 CATEGORY FILTER -->
+  <div class="d-flex gap-2 mb-4 flex-wrap justify-content-center">
+    
+    <a href="/listings" 
+       class="btn <%= !selectedCategory ? 'btn-dark' : 'btn-outline-dark' %>">
+      All
+    </a>
+
+    <a href="/listings?category=trending" 
+       class="btn <%= selectedCategory === 'trending' ? 'btn-primary' : 'btn-outline-primary' %>">
+      Trending
+    </a>
+
+    <a href="/listings?category=villa" 
+       class="btn <%= selectedCategory === 'villa' ? 'btn-success' : 'btn-outline-success' %>">
+      Villas
+    </a>
+
+    <a href="/listings?category=popular" 
+       class="btn <%= selectedCategory === 'popular' ? 'btn-danger' : 'btn-outline-danger' %>">
+      Popular
+    </a>
+
+    <a href="/listings?category=budget" 
+       class="btn <%= selectedCategory === 'budget' ? 'btn-warning' : 'btn-outline-warning' %>">
+      Budget
+    </a>
+
+  </div>
+
+  <!-- 💰 TAX SWITCH -->
+  <div class="tax-switch d-flex justify-content-end mb-4">
+    <div class="border rounded-4 px-4 py-3 shadow-sm bg-white">
+      <div class="form-check form-switch d-flex align-items-center gap-2 mb-0">
+        <input class="form-check-input" type="checkbox" id="switchCheckDefault">
+        <label class="form-check-label fw-semibold">
+          Total after tax
+        </label>
+      </div>
+    </div>
+  </div>
+
+  <!-- 📦 CATEGORY TITLE -->
+  <% if (selectedCategory) { %>
+    <h4 class="fw-bold mb-3 text-center text-capitalize">
+      <%= selectedCategory %> Listings
+    </h4>
+  <% } %>
+
+  <!-- 🏠 LISTINGS -->
+  <div class="row row-cols-lg-4 row-cols-md-2 row-cols-sm-1 g-4 mb-4">
+
+    <% allListings.forEach(listing => { %>
+      <div class="col">
+
+        <a href="/listings/<%= listing._id %>" class="text-decoration-none text-dark">
+
+          <div class="card listing-card h-100 border-0 shadow-sm">
+
+            <img 
+              src="<%= listing.image.url %>" 
+              class="card-img-top rounded-3"
+              style="height: 18rem; object-fit: cover;"
+              alt="listing"
+            />
+
+            <div class="card-body px-0 pt-2">
+              <p class="mb-1 fw-semibold">
+                <%= listing.title %>
+              </p>
+
+              <p class="text-muted small price"
+                 data-base-price="<%= listing.price %>">
+                &#8377;<%= listing.price.toLocaleString("en-IN") %> / night
+              </p>
+            </div>
+
+          </div>
+
+        </a>
+
+      </div>
+    <% }) %>
+
+  </div>
+
+  <!-- 📄 PAGINATION -->
+  <nav class="mt-4">
+    <ul class="pagination justify-content-center">
+
+      <% if (currentPage > 1) { %>
+        <li class="page-item">
+          <a class="page-link" href="/listings?page=<%= currentPage - 1 %>">Prev</a>
+        </li>
+      <% } %>
+
+      <% for (let i = 1; i <= totalPages; i++) { %>
+        <li class="page-item <%= i === currentPage ? 'active' : '' %>">
+          <a class="page-link" href="/listings?page=<%= i %>"><%= i %></a>
+        </li>
+      <% } %>
+
+      <% if (currentPage < totalPages) { %>
+        <li class="page-item">
+          <a class="page-link" href="/listings?page=<%= currentPage + 1 %>">Next</a>
+        </li>
+      <% } %>
+
+    </ul>
+  </nav>
+
+  <!-- 💰 TAX SCRIPT -->
+  <script>
+    const taxSwitch = document.getElementById("switchCheckDefault");
+    const priceElements = document.querySelectorAll(".price");
+
+    taxSwitch.addEventListener("change", () => {
+      priceElements.forEach(priceEl => {
+        const basePrice = Number(priceEl.dataset.basePrice);
+
+        if (taxSwitch.checked) {
+          const gstPrice = Math.round(basePrice * 1.12);
+          priceEl.innerHTML = `₹${gstPrice.toLocaleString("en-IN")} <span class="text-muted">(incl. 12% GST)</span> / night`;
+        } else {
+          priceEl.innerHTML = `₹${basePrice.toLocaleString("en-IN")} / night`;
+        }
+      });
+    });
+  </script>
+
+</body>

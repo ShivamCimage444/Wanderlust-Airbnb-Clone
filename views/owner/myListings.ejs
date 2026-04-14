@@ -1,0 +1,96 @@
+<% layout("/layouts/boilerplate") %>
+
+<style>
+body {
+  background: #f4f6fb;
+}
+
+/* HEADER */
+.page-title {
+  font-weight: 700;
+  margin-bottom: 25px;
+}
+
+/* CARD */
+.listing-card {
+  background: #fff;
+  border-radius: 15px;
+  padding: 18px;
+  box-shadow: 0 8px 20px rgba(0,0,0,.05);
+  transition: .3s;
+}
+.listing-card:hover {
+  transform: translateY(-5px);
+}
+
+/* IMAGE */
+.listing-img {
+  width: 100%;
+  height: 180px;
+  object-fit: cover;
+  border-radius: 10px;
+}
+
+/* GRID */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px,1fr));
+  gap: 20px;
+}
+
+/* BADGE */
+.badge-price {
+  background: #10b981;
+  color: white;
+  padding: 5px 10px;
+  border-radius: 8px;
+  font-size: 12px;
+}
+</style>
+
+<div class="container my-5">
+
+  <h2 class="page-title">🏠 My Listings</h2>
+
+  <% if (listings.length === 0) { %>
+    <p class="text-muted">No listings created yet.</p>
+  <% } else { %>
+
+  <div class="grid">
+
+    <% listings.forEach(l => { %>
+      <div class="listing-card">
+
+        <!-- IMAGE -->
+        <img src="<%= l.image?.url || '/images/default.jpg' %>" class="listing-img">
+
+        <!-- TITLE -->
+        <h5 class="mt-3"><%= l.title %></h5>
+
+        <!-- LOCATION -->
+        <p class="text-muted mb-1">📍 <%= l.location %></p>
+
+        <!-- CATEGORY -->
+        <p class="text-muted mb-1">🏷️ <%= l.category || "N/A" %></p>
+
+        <!-- PRICE -->
+        <span class="badge-price">₹ <%= l.price %> / night</span>
+
+        <!-- ACTIONS -->
+        <div class="mt-3 d-flex gap-2">
+          <a href="/listings/<%= l._id %>" class="btn btn-sm btn-primary w-100">View</a>
+          <a href="/listings/<%= l._id %>/edit" class="btn btn-sm btn-warning w-100">Edit</a>
+
+          <form action="/listings/<%= l._id %>?_method=DELETE" method="POST" style="width:100%;">
+            <button class="btn btn-sm btn-danger w-100">Delete</button>
+          </form>
+        </div>
+
+      </div>
+    <% }) %>
+
+  </div>
+
+  <% } %>
+
+</div>

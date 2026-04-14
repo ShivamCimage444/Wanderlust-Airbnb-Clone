@@ -1,0 +1,220 @@
+<% layout("/layouts/boilerplate") %>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<style>
+body {
+  background: #f4f6fb;
+}
+
+/* CARD */
+.card {
+  border-radius: 15px;
+  padding: 20px;
+  box-shadow: 0 8px 20px rgba(0,0,0,.05);
+  background: white;
+}
+
+/* GRID */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit,minmax(250px,1fr));
+  gap: 20px;
+}
+
+/* KPI COLORS */
+.green { color: #10b981; }
+.blue { color: #3b82f6; }
+.orange { color: #f59e0b; }
+
+/* TITLE */
+.page-title {
+  font-weight: 700;
+  margin-bottom: 25px;
+}
+</style>
+
+<div class="container my-5">
+
+<h2 class="page-title">📊 Admin Dashboard</h2>
+
+<!-- ================= FILTER ================= -->
+<div class="card mb-4">
+  <form method="GET" class="row g-3">
+
+    <div class="col-md-4">
+      <label>Month</label>
+      <select name="month" class="form-select">
+        <option value="all">All Months</option>
+        <% for(let i=0;i<12;i++){ %>
+          <option value="<%= i %>" <%= selectedMonth==i?"selected":"" %>>
+            <%= chartLabels[i] %>
+          </option>
+        <% } %>
+      </select>
+    </div>
+
+    <div class="col-md-4">
+      <label>Year</label>
+      <select name="year" class="form-select">
+        <% for(let y=2023; y<=new Date().getFullYear()+1; y++){ %>
+          <option value="<%= y %>" <%= selectedYear==y?"selected":"" %>>
+            <%= y %>
+          </option>
+        <% } %>
+      </select>
+    </div>
+
+    <div class="col-md-4 d-flex align-items-end">
+      <button class="btn btn-dark w-100">Apply Filter</button>
+    </div>
+
+  </form>
+</div>
+
+<!-- ================= KPI ================= -->
+<div class="grid mb-4">
+
+  <div class="card text-center">
+    <h6>Total Revenue</h6>
+    <h3>₹ <%= totalRevenue.toLocaleString() %></h3>
+  </div>
+
+  <div class="card text-center">
+    <h6>Admin Profit</h6>
+    <h3 class="green">₹ <%= adminRevenue.toLocaleString() %></h3>
+  </div>
+
+  <div class="card text-center">
+    <h6>Owner Earnings</h6>
+    <h3 class="blue">₹ <%= ownerRevenue.toLocaleString() %></h3>
+  </div>
+
+</div>
+
+<!-- ================= COMMISSION ================= -->
+<div class="card mb-4">
+  <h5>⚙ Commission Control</h5>
+
+  <form method="POST" action="/admin/commission">
+    <div class="row">
+      <div class="col-md-6">
+        <input 
+          type="number" 
+          name="rate" 
+          value="<%= commissionRate %>" 
+          class="form-control" 
+          placeholder="Enter %"
+          min="0"
+          max="100"
+          required
+        >
+      </div>
+
+      <div class="col-md-6">
+        <button type="submit" class="btn btn-warning w-100">
+          Update Commission %
+        </button>
+      </div>
+    </div>
+  </form>
+
+</div>
+
+<!-- ================= CHARTS ================= -->
+<div class="row g-4">
+
+  <!-- REVENUE -->
+  <div class="col-md-6">
+    <div class="card">
+      <h5>📈 Monthly Revenue</h5>
+      <canvas id="revenueChart"></canvas>
+    </div>
+  </div>
+
+  <!-- BOOKINGS -->
+  <div class="col-md-6">
+    <div class="card">
+      <h5>📊 Booking Growth</h5>
+      <canvas id="bookingChart"></canvas>
+    </div>
+  </div>
+
+</div>
+
+<div class="row g-4 mt-1">
+
+  <!-- USERS -->
+  <div class="col-md-6">
+    <div class="card">
+      <h5>👥 User Growth</h5>
+      <canvas id="userChart"></canvas>
+    </div>
+  </div>
+
+  <!-- SPLIT -->
+  <div class="col-md-4">
+    <div class="card">
+      <h5>💰 Revenue Split</h5>
+      <canvas id="splitChart"></canvas>
+    </div>
+  </div>
+
+</div>
+
+</div>
+
+<!-- ================= CHART SCRIPT ================= -->
+<script>
+
+// REVENUE
+new Chart(document.getElementById("revenueChart"), {
+  type: "bar",
+  data: {
+    labels: <%- JSON.stringify(chartLabels) %>,
+    datasets: [{
+      label: "Revenue",
+      data: <%- JSON.stringify(monthlyRevenue) %>,
+      borderWidth: 2
+    }]
+  }
+});
+
+// BOOKINGS
+new Chart(document.getElementById("bookingChart"), {
+  type: "line",
+  data: {
+    labels: <%- JSON.stringify(chartLabels) %>,
+    datasets: [{
+      label: "Bookings",
+      data: <%- JSON.stringify(bookingGrowth) %>,
+      tension: 0.4
+    }]
+  }
+});
+
+// USERS
+new Chart(document.getElementById("userChart"), {
+  type: "line",
+  data: {
+    labels: <%- JSON.stringify(chartLabels) %>,
+    datasets: [{
+      label: "Users",
+      data: <%- JSON.stringify(userGrowth) %>,
+      tension: 0.4
+    }]
+  }
+});
+
+// SPLIT
+new Chart(document.getElementById("splitChart"), {
+  type: "doughnut",
+  data: {
+    labels: ["Admin", "Owner"],
+    datasets: [{
+      data: [<%= adminRevenue %>, <%= ownerRevenue %>]
+    }]
+  }
+});
+
+</script>

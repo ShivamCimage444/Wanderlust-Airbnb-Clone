@@ -1,0 +1,105 @@
+<nav class="navbar navbar-expand-md bg-body-light border-bottom sticky-top shadow-sm position-relative">
+  <div class="container-fluid">
+
+    <!-- LOGO -->
+    <a class="navbar-brand" href="/listings">
+      <i class="fa-regular fa-compass"></i>
+    </a>
+
+    <!-- CENTER TITLE -->
+    <div class="position-absolute top-50 start-50 translate-middle">
+      <h5 class="mb-0 fw-bold">
+        Welcome to <span>Wanderlust</span>
+      </h5>
+    </div>
+
+    <!-- TOGGLER (MOBILE) -->
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
+      data-bs-target="#navbarNavAltMarkup">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <!-- NAVBAR CONTENT -->
+    <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
+
+      <!-- LEFT SIDE -->
+      <div class="navbar-nav">
+
+        <% if (currentUser && currentUser.role === "admin") { %>
+
+          <!-- ADMIN LINKS -->
+          <a class="nav-link" href="/listings">Explore</a>
+          <a class="nav-link" href="/admin/users">Users</a>
+          <a class="nav-link" href="/admin/bookings">Bookings</a>
+          <a class="nav-link" href="/admin/listings">Manage Listings</a>
+
+        <% } else { %>
+
+          <!-- USER / OWNER -->
+          <a class="nav-link" href="/listings">Explore</a>
+
+          <% if (currentUser) { %>
+            <div class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle" href="#" role="button"
+                 data-bs-toggle="dropdown">
+                <i class="fa-solid fa-book"></i> My Bookings
+              </a>
+
+              <ul class="dropdown-menu">
+                <li>
+                  <a class="dropdown-item" href="/bookings/my">
+                    <i class="fa-solid fa-calendar-check me-2"></i>
+                    My Bookings
+                  </a>
+                </li>
+                <li>
+                  <a class="dropdown-item" href="/bookings/history">
+                    <i class="fa-solid fa-clock-rotate-left me-2"></i>
+                    Booking History
+                  </a>
+                </li>
+              </ul>
+            </div>
+          <% } %>
+
+        <% } %>
+
+      </div>
+
+      <!-- RIGHT SIDE -->
+      <div class="navbar-nav ms-auto">
+
+        <% if (!currentUser) { %>
+
+          <a class="nav-link" href="/signup">Sign Up</a>
+          <a class="nav-link" href="/login">Log in</a>
+
+        <% } else { %>
+
+          <% if (currentUser.role === "admin") { %>
+
+            <a class="nav-link text-danger fw-bold" href="/admin/dashboard">
+              👑 Admin Dashboard
+            </a>
+
+          <% } else { %>
+
+            <a class="nav-link" href="/bookings/owner/dashboard">
+              Hello <%= currentUser.username %>
+            </a>
+
+            <a class="nav-link" href="/listings/new">
+              Wanderlust your home
+            </a>
+
+          <% } %>
+
+          <a class="nav-link" href="/logout">Logout</a>
+
+        <% } %>
+
+      </div>
+
+    </div>
+  </div>
+</nav>

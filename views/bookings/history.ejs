@@ -1,0 +1,227 @@
+<% layout("/layouts/boilerplate") %>
+
+<style>
+  body {
+    background: linear-gradient(180deg, #f7f9ff, #eef2ff);
+  }
+
+  .glass {
+    background: rgba(255,255,255,.75);
+    backdrop-filter: blur(14px);
+    border-radius: 20px;
+    box-shadow: 0 20px 50px rgba(0,0,0,.08);
+  }
+
+  .hover-lift {
+    transition: all .3s ease;
+  }
+  .hover-lift:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 30px 70px rgba(0,0,0,.12);
+  }
+
+  .page-title {
+    font-weight: 700;
+  }
+
+  .filter-box label {
+    font-size: .9rem;
+  }
+
+  .status-pill {
+    border-radius: 999px;
+    padding: 6px 14px;
+    font-size: .8rem;
+    font-weight: 500;
+  }
+
+  .page-title span {
+    background: linear-gradient(135deg,  #fe424d,  #fe424d);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .pagination .page-link {
+    border-radius: 999px;
+    margin: 0 4px;
+  }
+</style>
+
+<!-- ===== ALERT ===== -->
+ <div class="container mt-4">
+  <div class="alert alert-danger glass-card d-flex justify-content-between align-items-center" role="alert">
+    <div>
+      <strong>⚠ NOTICE —</strong> Just coming before must verify your booking status
+    </div>
+    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+  </div>
+</div>
+
+<div class="container my-5">
+  <!-- ===== HEADING ===== -->
+  <h2 class="page-title mb-4 text-">
+    <i class="bi bi-clock-history"></i> <span>Booking History</span>
+  </h2>
+
+  <!-- ================= FILTER FORM ================= -->
+  <form method="GET" class="row g-3 mb-4 glass hover-lift p-4 filter-box">
+    <div class="col-md-3">
+      <label class="form-label fw-semibold">From</label>
+      <input type="date" name="from" value="<%= from %>" class="form-control">
+    </div>
+
+    <div class="col-md-3">
+      <label class="form-label fw-semibold">To</label>
+      <input type="date" name="to" value="<%= to %>" class="form-control">
+    </div>
+
+    <div class="col-md-3">
+      <label class="form-label fw-semibold">Status</label>
+      <select name="status" class="form-select">
+        <option value="all" <%= selectedStatus === "all" ? "selected" : "" %>>All</option>
+        <option value="confirmed" <%= selectedStatus === "confirmed" ? "selected" : "" %>>Confirmed</option>
+        <option value="cancelled_by_owner" <%= selectedStatus === "cancelled_by_owner" ? "selected" : "" %>>Cancelled by Owner</option>
+        <option value="cancelled_by_user" <%= selectedStatus === "cancelled_by_user" ? "selected" : "" %>>Cancelled by You</option>
+        <option value="rejected" <%= selectedStatus === "rejected" ? "selected" : "" %>>Rejected</option>
+      </select>
+    </div>
+
+    <div class="col-md-3 d-flex align-items-end">
+      <button class="btn  w-100 rounded-pill" style="background-color: #fe424d; color:#f7f9ff;">
+        <i class="bi bi-funnel-fill"></i> Filter
+      </button>
+    </div>
+  </form>
+
+  <!-- ================= EMPTY STATE ================= -->
+  <% if (history.length === 0) { %>
+    <div class="alert alert-secondary text-center glass">
+      <i class="bi bi-exclamation-circle"></i>
+      No bookings found for selected filters.
+    </div>
+  <% } %>
+
+  <!-- ================= BOOKINGS LIST ================= -->
+  <% history.forEach(b => { %>
+    <div class="card mb-4 glass hover-lift
+      <% if (b.status === "confirmed") { %> border-success <% } %>
+      <% if (b.status === "rejected") { %> border-danger <% } %>
+      <% if (b.status === "cancelled_by_owner" || b.status === "cancelled_by_user") { %> border-warning <% } %>
+    ">
+      <div class="card-body d-flex justify-content-between align-items-start flex-wrap p-4">
+
+        <!-- LEFT -->
+        <div>
+          <h5 class="card-title mb-2">
+            <i class="bi bi-house-door-fill text-primary"></i>
+             <%= b.listing ? b.listing.title : "Listing Deleted" %>
+          </h5>
+
+          <p class="text-muted mb-2">
+            <i class="bi bi-calendar-event"></i>
+            <%= b.startDate.toDateString() %> → <%= b.endDate.toDateString() %>
+          </p>
+
+          <!-- STATUS -->
+          <% if (b.status === "confirmed") { %>
+            <span class="badge bg-success status-pill">
+              <i class="bi bi-check-circle"></i> Confirmed
+            </span>
+          <% } else if (b.status === "rejected") { %>
+            <span class="badge bg-danger status-pill">
+              <i class="bi bi-x-circle"></i> Rejected
+            </span>
+          <% } else if (b.status === "cancelled_by_owner") { %>
+            <span class="badge bg-warning text-dark status-pill">
+              <i class="bi bi-exclamation-triangle"></i> Cancelled by Owner
+            </span>
+          <% } else if (b.status === "cancelled_by_user") { %>
+            <span class="badge bg-warning text-dark status-pill">
+              <i class="bi bi-person-x"></i> Cancelled by You
+            </span>
+          <% } %>
+
+          <!-- CANCEL REASON -->
+          <% if (b.cancelReason) { %>
+            <p class="text-muted mt-2 mb-0">
+              <strong>Reason:</strong> <%= b.cancelReason %>
+            </p>
+          <% } %>
+
+          <!-- PAYMENT STATUS -->
+          <% if (b.payment?.paid) { %>
+            <p class="text-success mt-2 mb-0">
+              <i class="bi bi-cash-stack"></i> Payment Completed
+            </p>
+          <% } %>
+        </div>
+
+        <!-- RIGHT -->
+        <div class="text-end mt-3 mt-md-0" style="min-width:220px;">
+          <a href="/bookings/<%= b._id %>" class="btn btn-outline-primary btn-sm w-100 mb-2 rounded-pill">
+            <i class="bi bi-eye-fill"></i> View Detail
+          </a>
+
+          <% if (b.status === "confirmed" && new Date(b.startDate) > new Date()) { %>
+            <form
+              action="/bookings/user/<%= b._id %>/cancel"
+              method="POST"
+              onsubmit="return confirm('Are you sure you want to cancel this booking?')"
+            >
+              <textarea
+                name="cancelReason"
+                class="form-control mb-2"
+                rows="2"
+                placeholder="Reason for cancellation"
+                required
+              ></textarea>
+              <button class="btn btn-outline-danger btn-sm w-100 rounded-pill">
+                <i class="bi bi-x-circle"></i> Cancel Booking
+              </button>
+            </form>
+          <% } else if (b.status === "confirmed") { %>
+            <span class="badge bg-secondary mt-2 d-inline-block">
+              Cancellation Closed
+            </span>
+          <% } %>
+        </div>
+
+      </div>
+    </div>
+  <% }) %>
+
+  <!-- ================= PAGINATION ================= -->
+  <% if (totalPages > 1) { %>
+    <nav class="mt-5">
+      <ul class="pagination justify-content-center">
+        <% if (currentPage > 1) { %>
+          <li class="page-item">
+            <a class="page-link" href="?page=<%= currentPage - 1 %>&from=<%= from %>&to=<%= to %>&status=<%= selectedStatus %>">
+              <i class="bi bi-chevron-left"></i>
+            </a>
+          </li>
+        <% } %>
+
+        <% for (let i = 1; i <= totalPages; i++) { %>
+          <li class="page-item <%= i === currentPage ? 'active' : '' %>">
+            <a class="page-link" href="?page=<%= i %>&from=<%= from %>&to=<%= to %>&status=<%= selectedStatus %>">
+              <%= i %>
+            </a>
+          </li>
+        <% } %>
+
+        <% if (currentPage < totalPages) { %>
+          <li class="page-item">
+            <a class="page-link" href="?page=<%= currentPage + 1 %>&from=<%= from %>&to=<%= to %>&status=<%= selectedStatus %>">
+              <i class="bi bi-chevron-right"></i>
+            </a>
+          </li>
+        <% } %>
+      </ul>
+    </nav>
+  <% } %>
+
+</div>
+
+
+ 

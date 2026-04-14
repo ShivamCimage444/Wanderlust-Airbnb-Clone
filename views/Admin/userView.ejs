@@ -1,0 +1,185 @@
+<% layout("/layouts/boilerplate") %>
+
+<div class="container my-5">
+
+  <!-- USER INFO -->
+  <div class="card shadow mb-4 p-4">
+    <h3><%= user.username %></h3>
+    <p class="mb-1"><strong>Email:</strong> <%= user.email %></p>
+    <span class="badge bg-primary"><%= user.role.toUpperCase() %></span>
+    <% if (user.isBlocked) { %>
+      <span class="badge bg-danger">Blocked</span>
+    <% } %>
+  </div>
+
+  <!-- ================= OWNER LISTINGS ================= -->
+ <% if (user.role === "owner") { %>
+  <div class="card shadow mb-4 p-4">
+    <h5 class="mb-3"> Listings Created</h5>
+
+    <% if (listings.length === 0) { %>
+      <p class="text-muted">No listings created.</p>
+    <% } else { %>
+      <select class="form-select mb-3" id="listingDropdown">
+        <option value="">Select a listing</option>
+        <% listings.forEach(listing => { %>
+          <option 
+            value="<%= listing._id %>" 
+            data-owner="<%= user.username %>"
+          >
+            <%= listing.title %>
+          </option>
+        <% }) %>
+      </select>
+    <% } %>
+
+    <div id="listingInfo" class="d-none p-3 bg-light rounded shadow-sm">
+      <p><strong>Listing:</strong> <span id="listingTitle"></span></p>
+      <p><strong>Owner:</strong> <span id="listingOwner"></span></p>
+    </div>
+  </div>
+<% } %>
+
+
+  <!-- ================= BOOKINGS MADE ================= -->
+ <div class="card shadow mb-4 p-4">
+  <h5 class="mb-3"> Bookings Made</h5>
+
+  <% if (userBookings.length === 0) { %>
+    <p class="text-muted">No bookings made.</p>
+  <% } else { %>
+    <select class="form-select mb-3" id="bookingDropdown">
+      <option value="">Select a booking</option>
+
+      <% userBookings.forEach(b => { %>
+        <option 
+          value="<%= b._id %>"
+          data-listing="<%= b.listing ? b.listing.title : 'Listing Deleted' %>"
+          data-owner="<%= b.owner?.username || 'N/A' %>"
+          data-start="<%= new Date(b.startDate).toLocaleDateString() %>"
+          data-end="<%= new Date(b.endDate).toLocaleDateString() %>"
+          data-own="<%= b.owner && b.owner._id.toString() === user._id.toString() %>"
+        >
+          <%= b.listing ? b.listing.title : 'Listing Deleted' %>
+          (<%= new Date(b.startDate).toLocaleDateString() %> → <%= new Date(b.endDate).toLocaleDateString() %>)
+        </option>
+      <% }) %>
+    </select>
+  <% } %>
+
+  <div id="bookingInfo" class="d-none p-3 bg-light rounded shadow-sm">
+    <p><strong>Listing:</strong> <span id="bookingListing"></span></p>
+    <p><strong>Owner:</strong> <span id="bookingOwner"></span></p>
+    <p><strong>Dates:</strong> <span id="bookingDates"></span></p>
+    <span id="bookingTypeBadge" class="badge"></span>
+  </div>
+</div>
+
+
+  <!-- ================= BOOKINGS RECEIVED ================= -->
+ <% if (user.role === "owner") { %>
+  <div class="card shadow mb-4 p-4">
+    <h5 class="mb-3"> Bookings Received on Your Listings</h5>
+
+    <% if (receivedBookings.length === 0) { %>
+      <p class="text-muted">No bookings received.</p>
+    <% } else { %>
+      <select class="form-select mb-3" id="receivedDropdown">
+        <option value="">Select a received booking</option>
+
+        <% receivedBookings.forEach(b => { %>
+          <% if (b.listing) { %>
+            <option
+              value="<%= b._id %>"
+              data-listing="<%= b.listing.title %>"
+              data-user="<%= b.user?.username || 'N/A' %>"
+              data-start="<%= new Date(b.startDate).toLocaleDateString() %>"
+              data-end="<%= new Date(b.endDate).toLocaleDateString() %>"
+              data-revenue="<%= (b.listing.price * Math.max(1, (new Date(b.endDate)-new Date(b.startDate))/(1000*60*60*24))).toLocaleString() %>"
+            >
+              <%= b.listing.title %>
+            </option>
+          <% } %>
+        <% }) %>
+      </select>
+    <% } %>
+
+    <div id="receivedInfo" class="d-none p-3 bg-light rounded shadow-sm">
+      <p><strong>Listing:</strong> <span id="receivedListing"></span></p>
+      <p><strong>Booked By:</strong> <span id="receivedUser"></span></p>
+      <p><strong>Dates:</strong> <span id="receivedDates"></span></p>
+      <p><strong>Revenue:</strong> ₹<span id="receivedRevenue"></span></p>
+    </div>
+  </div>
+<% } %>
+
+  <a href="/admin/users" class="btn btn-secondary mt-3">⬅ Back</a>
+</div>
+
+<script>
+  // === LISTING DROPDOWN ===
+  const listingDropdown = document.getElementById('listingDropdown');
+  const listingInfo = document.getElementById('listingInfo');
+
+  if (listingDropdown) {
+    listingDropdown.addEventListener('change', () => {
+      const selected = listingDropdown.options[listingDropdown.selectedIndex];
+
+      if (!selected.value) {
+        listingInfo.classList.add('d-none');
+        return;
+      }
+
+      // ✅ Show info (your existing feature)
+      document.getElementById('listingTitle').innerText = selected.text;
+      document.getElementById('listingOwner').innerText = selected.dataset.owner;
+      listingInfo.classList.remove('d-none');
+
+      // 🚀 NEW: Redirect to listing page
+      window.location.href = `/listings/${selected.value}`;
+    });
+  }
+
+
+  // === BOOKINGS MADE DROPDOWN ===
+  const bookingDropdown = document.getElementById('bookingDropdown');
+  const bookingInfo = document.getElementById('bookingInfo');
+  bookingDropdown.addEventListener('change', () => {
+    const selected = bookingDropdown.options[bookingDropdown.selectedIndex];
+    if(!selected.value) {
+      bookingInfo.classList.add('d-none');
+      return;
+    }
+    document.getElementById('bookingListing').innerText = selected.dataset.listing;
+    document.getElementById('bookingOwner').innerText = selected.dataset.owner;
+    document.getElementById('bookingDates').innerText = selected.dataset.start + ' → ' + selected.dataset.end;
+
+    const badge = document.getElementById('bookingTypeBadge');
+    if(selected.dataset.own === 'true'){
+      badge.innerText = 'Own Listing';
+      badge.className = 'badge bg-dark';
+    } else {
+      badge.innerText = 'Other Owner';
+      badge.className = 'badge bg-info';
+    }
+    bookingInfo.classList.remove('d-none');
+  });
+
+  // === BOOKINGS RECEIVED DROPDOWN ===
+  const receivedDropdown = document.getElementById('receivedDropdown');
+  const receivedInfo = document.getElementById('receivedInfo');
+  if(receivedDropdown){
+    receivedDropdown.addEventListener('change', () => {
+      const selected = receivedDropdown.options[receivedDropdown.selectedIndex];
+      if(!selected.value) {
+        receivedInfo.classList.add('d-none');
+        return;
+      }
+      document.getElementById('receivedListing').innerText = selected.dataset.listing;
+      document.getElementById('receivedUser').innerText = selected.dataset.user;
+      document.getElementById('receivedDates').innerText = selected.dataset.start + ' → ' + selected.dataset.end;
+      document.getElementById('receivedRevenue').innerText = selected.dataset.revenue;
+      receivedInfo.classList.remove('d-none');
+    });
+  }
+</script>

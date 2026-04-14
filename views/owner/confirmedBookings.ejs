@@ -1,0 +1,196 @@
+<% layout("/layouts/boilerplate") %>
+<link rel="stylesheet" href="/css/style.css">
+
+<style>
+body {
+  background: #f4f6fb;
+  font-family: 'Inter', sans-serif;
+}
+
+h3 {
+  font-weight: 700;
+  font-size: 26px;
+  margin-bottom: 30px;
+  color: #fe424d;
+}
+
+/* FILTER */
+.filter-form {
+  background: #fff;
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.05);
+}
+
+/* CARD */
+.booking-card {
+  background: #fff;
+  border-radius: 14px;
+  padding: 20px;
+  margin-bottom: 20px;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.06);
+  transition: 0.3s;
+}
+.booking-card:hover {
+  transform: translateY(-4px);
+}
+
+/* ACTION */
+.actions {
+  border-left: 1px solid #e5e7eb;
+  padding-left: 20px;
+}
+
+@media(max-width:768px){
+  .actions {
+    border-left: none;
+    padding-left: 0;
+    margin-top: 15px;
+  }
+}
+</style>
+
+<div class="container my-5">
+
+  <h3>Confirmed Bookings</h3>
+
+  <!-- ================= FILTER ================= -->
+  <form method="GET" class="row g-3 mb-4 filter-form">
+
+    <div class="col-md-4">
+      <select name="listingId" class="form-select">
+        <option value="">All Listings</option>
+        <% listings.forEach(l => { %>
+          <option value="<%= l._id %>" 
+            <%= selectedListing == l._id.toString() ? "selected" : "" %>>
+            <%= l.title %>
+          </option>
+        <% }) %>
+      </select>
+    </div>
+
+    <div class="col-md-4">
+      <input type="month" name="month" 
+        value="<%= selectedMonth || '' %>" 
+        class="form-control"/>
+    </div>
+
+    <div class="col-md-4 d-flex align-items-end">
+      <button class="btn btn-dark w-100">Apply Filters</button>
+    </div>
+
+  </form>
+
+  <!-- ================= NO DATA ================= -->
+  <% if (!confirmedBookings || confirmedBookings.length === 0) { %>
+    <p class="text-muted text-center mt-5">No confirmed bookings.</p>
+  <% } else { %>
+
+  <!-- ================= LIST ================= -->
+  <% confirmedBookings.forEach(b => { 
+
+    const nights = Math.max(1,
+      Math.ceil((new Date(b.endDate) - new Date(b.startDate)) / (1000*60*60*24))
+    );
+
+    const total = b.listing ? nights * b.listing.price : 0;
+
+  %>
+
+  <div class="booking-card row align-items-center">
+
+    <!-- LEFT -->
+    <div class="col-md-4">
+
+      <h5><%= b.user?.username || "Guest User" %></h5>
+
+      <p>🏠 <%= b.listing?.title || "Listing Deleted" %></p>
+
+      <p>
+        📅 
+        <%= b.startDate ? new Date(b.startDate).toDateString() : "N/A" %>
+        →
+        <%= b.endDate ? new Date(b.endDate).toDateString() : "N/A" %>
+      </p>
+
+      <p>🛏️ Nights: <%= nights %></p>
+
+      <p>💰 Total: ₹ <%= total %></p>
+
+      <span class="badge bg-success mt-2">Paid</span>
+    </div>
+
+    <!-- RIGHT -->
+    <div class="col-md-4 actions">
+
+      <a href="/bookings/owner/<%= b._id %>/details"
+        class="btn btn-primary btn-sm mb-2 w-100">
+        View Details
+      </a>
+
+      <form action="/bookings/owner/<%= b._id %>/cancel"
+        method="POST"
+        onsubmit="return confirm('Cancel this booking?')">
+
+        <textarea name="cancelReason"
+          class="form-control mb-2"
+          rows="2"
+          placeholder="Reason required"
+          required></textarea>
+
+        <% if (b.startDate && new Date(b.startDate) > new Date()) { %>
+          <button class="btn btn-outline-danger btn-sm w-100">
+            Cancel Booking
+          </button>
+        <% } else { %>
+          <span class="badge bg-secondary w-100 d-block text-center">
+            Cancellation Closed
+          </span>
+        <% } %>
+
+      </form>
+
+    </div>
+
+  </div>
+
+  <% }) %>
+  <% } %>
+
+  <!-- ================= PAGINATION ================= -->
+  <% if (totalPages > 1) { %>
+  <nav class="mt-4">
+    <ul class="pagination justify-content-center">
+
+      <% if (currentPage > 1) { %>
+        <li class="page-item">
+          <a class="page-link"
+            href="?page=<%= currentPage - 1 %>&listingId=<%= selectedListing %>&month=<%= selectedMonth %>">
+            Prev
+          </a>
+        </li>
+      <% } %>
+
+      <% for (let i = 1; i <= totalPages; i++) { %>
+        <li class="page-item <%= i === currentPage ? 'active' : '' %>">
+          <a class="page-link"
+            href="?page=<%= i %>&listingId=<%= selectedListing %>&month=<%= selectedMonth %>">
+            <%= i %>
+          </a>
+        </li>
+      <% } %>
+
+      <% if (currentPage < totalPages) { %>
+        <li class="page-item">
+          <a class="page-link"
+            href="?page=<%= currentPage + 1 %>&listingId=<%= selectedListing %>&month=<%= selectedMonth %>">
+            Next
+          </a>
+        </li>
+      <% } %>
+
+    </ul>
+  </nav>
+  <% } %>
+
+</div>

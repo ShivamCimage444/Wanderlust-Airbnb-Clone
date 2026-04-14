@@ -1,0 +1,184 @@
+<% layout("/layouts/boilerplate") %>
+
+<div class="container my-5">
+
+  <!-- HEADER -->
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+      <h3 class="fw-bold mb-0">Listings Management</h3>
+      <small class="text-muted">Manage all listings from here</small>
+    </div>
+    <a href="/listings" class="btn btn-dark">Explore</a>
+  </div>
+
+  <!-- TABLE VIEW -->
+  <div class="card border-0 shadow-sm">
+    <div class="table-responsive">
+
+      <table class="table align-middle mb-0">
+
+        <!-- HEAD -->
+        <thead class="table-light">
+          <tr>
+            <th>Image</th>
+            <th>Title</th>
+            <th>Location</th>
+            <th>Price</th>
+            <th>Owner</th>
+            <th class="text-center">Actions</th>
+          </tr>
+        </thead>
+
+        <!-- BODY -->
+        <tbody>
+
+          <% if (listings.length === 0) { %>
+            <tr>
+              <td colspan="6" class="text-center text-muted py-4">
+                No listings found
+              </td>
+            </tr>
+          <% } %>
+
+          <% listings.forEach(listing => { %>
+            <tr>
+
+              <!-- IMAGE -->
+              <td>
+                <img src="<%= listing.image.url %>"
+                     style="width:70px; height:50px; object-fit:cover; border-radius:8px;">
+              </td>
+
+              <!-- TITLE -->
+              <td class="fw-semibold">
+                <a href="/listings/<%= listing._id %>" class="text-dark text-decoration-none">
+                  <%= listing.title %>
+                </a>
+              </td>
+
+              <!-- LOCATION -->
+              <td class="text-muted">
+                <%= listing.location %>, <%= listing.country %>
+              </td>
+
+              <!-- PRICE -->
+              <td>
+                ₹<%= listing.price.toLocaleString("en-IN") %>
+              </td>
+
+              <!-- OWNER -->
+              <td>
+                <%= listing.owner?.username || "N/A" %>
+              </td>
+
+              <!-- ACTIONS -->
+              <td class="text-center">
+
+                <a href="/listings/<%= listing._id %>" 
+                   class="btn btn-sm btn-outline-primary me-1">
+                   View
+                </a>
+
+                <form action="/admin/listings/<%= listing._id %>?_method=DELETE"
+                      method="POST" style="display:inline;"
+                      onsubmit="return confirm('Delete this listing?')">
+                  <button class="btn btn-sm btn-outline-danger">
+                    Delete
+                  </button>
+                </form>
+
+              </td>
+
+            </tr>
+          <% }) %>
+
+        </tbody>
+
+      </table>
+    </div>
+  </div>
+
+  <!-- PAGINATION -->
+  <nav class="mt-4">
+    <ul class="pagination justify-content-center">
+
+      <% if (currentPage > 1) { %>
+        <li class="page-item">
+          <a class="page-link" href="/admin/listings?page=<%= currentPage - 1 %>">
+            Prev
+          </a>
+        </li>
+      <% } %>
+
+      <% for (let i = 1; i <= totalPages; i++) { %>
+        <li class="page-item <%= i === currentPage ? 'active' : '' %>">
+          <a class="page-link" href="/admin/listings?page=<%= i %>">
+            <%= i %>
+          </a>
+        </li>
+      <% } %>
+
+      <% if (currentPage < totalPages) { %>
+        <li class="page-item">
+          <a class="page-link" href="/admin/listings?page=<%= currentPage + 1 %>">
+            Next
+          </a>
+        </li>
+      <% } %>
+
+    </ul>
+  </nav>
+
+</div>
+
+<!-- STYLE -->
+<style>
+  table tr:hover {
+    background-color: #f8f9fa;
+  }
+
+  .table th {
+    font-size: 14px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+</style>
+
+<!-- PAGINATION -->
+<nav class="mt-5">
+  <ul class="pagination justify-content-center">
+
+    <% if (currentPage > 1) { %>
+      <li class="page-item">
+        <a class="page-link" href="/admin/listings?page=<%= currentPage - 1 %>">
+          Prev
+        </a>
+      </li>
+    <% } %>
+
+    <% for (let i = 1; i <= totalPages; i++) { %>
+      <li class="page-item <%= i === currentPage ? 'active' : '' %>">
+        <a class="page-link" href="/admin/listings?page=<%= i %>">
+          <%= i %>
+        </a>
+      </li>
+    <% } %>
+
+    <% if (currentPage < totalPages) { %>
+      <li class="page-item">
+        <a class="page-link" href="/admin/listings?page=<%= currentPage + 1 %>">
+          Next
+        </a>
+      </li>
+    <% } %>
+
+  </ul>
+</nav>
+
+<!-- OPTIONAL STYLING -->
+<style>
+  .listing-card:hover {
+    transform: translateY(-5px);
+    transition: 0.3s ease;
+  }
+</style>

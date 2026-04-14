@@ -1,0 +1,232 @@
+<% layout("/layouts/boilerplate") %>
+
+<%
+  const isRejected = booking.status === "rejected";
+  const isConfirmed = booking.status === "confirmed";
+  const isCancelled = ["cancelled_by_owner", "cancelled_by_user"].includes(booking.status);
+  const isRefunded = booking.payment?.paid && booking.status === "cancelled_by_owner";
+%>
+
+<!-- STYLES -->
+<style>
+body {
+  background: linear-gradient(135deg, #f5f7fb, #eef1f7);
+  font-family: Inter, system-ui;
+}
+
+.receipt {
+  max-width: 880px;
+  margin: 40px auto;
+  background: #fff;
+  border-radius: 20px;
+  box-shadow: 0 30px 80px rgba(0,0,0,.08);
+  padding: 42px;
+}
+
+.receipt-header {
+  display: flex;
+  justify-content: space-between;
+  border-bottom: 2px dashed #e3e6ef;
+  padding-bottom: 24px;
+  margin-bottom: 30px;
+}
+
+.brand {
+  font-size: 1.8rem;
+  font-weight: 800;
+  color: #fe424d;
+}
+
+.section { margin-bottom: 30px; }
+.section-title { font-weight: 600; margin-bottom: 14px; color: #222; }
+
+.info-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 18px;
+}
+.info-grid div {
+  background: #f8f9ff;
+  padding: 14px 16px;
+  border-radius: 12px;
+}
+
+.divider {
+  border-top: 1px dashed #e3e6ef;
+  margin: 30px 0;
+}
+
+.amount-box {
+  background: linear-gradient(135deg, #f8f9ff, #f1f4ff);
+  border-radius: 16px;
+  padding: 22px;
+}
+
+.amount-row {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.total {
+  font-size: 1.4rem;
+  font-weight: 800;
+  color: #fe424d;
+}
+
+.status-pill {
+  padding: 6px 16px;
+  border-radius: 999px;
+  font-size: .8rem;
+  font-weight: 600;
+}
+
+.qr-box {
+  text-align: center;
+  margin-top: 30px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center; 
+  align-items: center;     
+  min-height: 20vh;        
+}
+
+.print-btn {
+  text-align: center;
+  margin-top: 30px;
+}
+
+@media print {
+  body { background: #fff; }
+  .print-btn { display: none; }
+}
+</style>
+
+<!-- RECEIPT CONTENT -->
+<div class="receipt">
+
+  <!-- HEADER -->
+  <div class="receipt-header">
+    <div>
+      <div class="brand">Wanderlust</div>
+      <small class="text-muted">Booking Receipt</small>
+    </div>
+    <div>
+      <div><strong>Receipt #</strong> <%= booking._id %></div>
+      <div><strong>Date:</strong> <%= booking.completedAt?.toDateString() || "-" %></div>
+    </div>
+  </div>
+
+  <!-- STATUS -->
+  <div class="mb-3">
+    <% if (isConfirmed) { %>
+      <span class="badge bg-success status-pill">Confirmed</span>
+    <% } else if (isRejected) { %>
+      <span class="badge bg-danger status-pill">Rejected</span>
+    <% } else if (booking.status === "cancelled_by_owner") { %>
+      <span class="badge bg-warning text-dark status-pill">Cancelled by Owner</span>
+    <% } else if (booking.status === "cancelled_by_user") { %>
+      <span class="badge bg-secondary status-pill">Cancelled by You</span>
+    <% } %>
+  </div>
+
+  <!-- PROPERTY DETAILS -->
+  <div class="section">
+    <h5 class="section-title">🏠 Property Details</h5>
+    <p><strong><%= booking.listing?.title || "Listing Deleted" %></strong></p>
+    <p class="text-muted">👤 Hosted by <strong><%= booking.listing?.owner?.username || "N/A" %></strong></p>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- STAY INFO -->
+  <div class="section">
+    <h5 class="section-title">📅 Stay Information</h5>
+    <div class="info-grid">
+      <div>Check-in<br><strong><%= booking.startDate.toDateString() %></strong></div>
+      <div>Check-out<br><strong><%= booking.endDate.toDateString() %></strong></div>
+      <div>Guests<br><strong><%= booking.guestDetails?.adults || 1 %> Adults, <%= booking.guestDetails?.children || 0 %> Children</strong></div>
+      <div>Room Type<br><strong><%= booking.guestDetails?.roomType || "No preference" %></strong></div>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- GUEST PREFERENCES -->
+  <div class="section">
+    <h5 class="section-title">🛎️ Guest Preferences</h5>
+    <div class="info-grid">
+      <div>Floor<br><strong><%= booking.guestDetails?.floor || "No preference" %></strong></div>
+      <div>View<br><strong><%= booking.guestDetails?.view || "No preference" %></strong></div>
+      <div style="grid-column: span 2;">Special Request<br><strong><%= booking.guestDetails?.specialRequests || "None" %></strong></div>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- PAYMENT & AMOUNT -->
+  <% if (!isRejected) { %>
+  <div class="section">
+    <h5 class="section-title">💳 Payment</h5>
+    <p><strong>Method:</strong> <%= booking.payment?.method || "N/A" %></p>
+    <% if (booking.payment?.paid) { %>
+      <span class="badge bg-success status-pill">Paid</span>
+    <% } %>
+    <% if (isRefunded) { %>
+      <span class="badge bg-info status-pill">Refund Initiated</span>
+    <% } %>
+  </div>
+
+  <div class="divider"></div>
+
+  <div class="section amount-box">
+    <div class="amount-row"><span>Base Price</span><span>₹ <%= basePrice %></span></div>
+    <div class="amount-row"><span>GST (12%)</span><span>₹ <%= gstAmount %></span></div>
+    <hr>
+    <div class="amount-row total"><span>Total</span><span>₹ <%= totalPrice %></span></div>
+  </div>
+  <% } %>
+
+  <!-- CANCELLATION -->
+  <% if (booking.cancelReason) { %>
+  <div class="divider"></div>
+  <div class="section">
+    <h5 class="section-title text-danger">Cancellation Reason</h5>
+    <p class="p-3 bg-light rounded-3"><%= booking.cancelReason %></p>
+  </div>
+  <% } %>
+
+  <!-- QR CODE -->
+  <% if (isConfirmed) { %>
+  <div class="qr-box">
+    <h6 class="mb-3">📎 Scan for Booking Verification</h6>
+    <div id="qrcode"></div>
+  </div>
+  <% } %>
+
+  <!-- PRINT -->
+  <% if (isConfirmed) { %>
+  <div class="print-btn">
+    <button onclick="window.print()" class="btn btn-outline-primary rounded-pill">🖨️ Print Receipt</button>
+  </div>
+  <% } %>
+
+</div>
+
+<!-- QR CODE LIBRARY -->
+<script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+<script>
+  <% if (isConfirmed) { %>
+    // ensure div exists first
+    const qrcodeDiv = document.getElementById("qrcode");
+    if (qrcodeDiv) {
+      new QRCode(qrcodeDiv, {
+        text: `Booking ID: <%= booking._id %>
+Status: <%= booking.status %>
+Total: ₹ <%= totalPrice %>`,
+        width: 140,
+        height: 140
+      });
+    }
+  <% } %>
+</script>

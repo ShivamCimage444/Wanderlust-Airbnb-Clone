@@ -1,0 +1,68 @@
+<% layout("/layouts/boilerplate") %>
+<body>
+    <div class="row mt-3">
+        <div class="col-8 offset-2">
+    <h3>Create A New Listing</h3>
+    <form method="post" action="/listings" enctype="multipart/form-data" novalidate class="needs-validation">
+        <div class="mb-3">
+            <label for="title" class="form-label">Title</label>
+        <input type="text" placeholder="Add a catchy title" name="Listing[title]" class="form-control" required />
+        <div class="valid-feedback">Title looks good!</div>
+        </div>
+
+        <div class="mb-3">
+        <label for="description" class="form-label">Description</label>
+        <textarea  class="form-control" name="Listing[description]" required></textarea>
+        <div class="invalid-feedback">Description should be valid</div>
+        </div>
+<div class="mb-3">
+  <label class="form-label fw-semibold">Choose Category</label>
+
+  <select name="categoryKey" class="form-select" required>
+    <option value="">Select Category</option>
+
+    <option value="trending">🔥 Trending</option>
+    <option value="villa">🏡 Villa</option>
+    <option value="popular">⭐ Popular</option>
+    <option value="budget">💰 Budget</option>
+
+  </select>
+
+  <div class="invalid-feedback">
+    Please select a category
+  </div>
+</div>
+       <div class="mb-3">
+        <!-- Image Upload -->
+       <label class="form-label mt-3">Upload Image</label>
+       <input type="file" name="image"id="imageInput" class="form-control" accept="image/*">
+          <small class="text-danger d-none" id="imageError"></small>
+       </div>
+
+        <div class="row">
+        <div class="mb-3 col-md-4">
+         <label for="price" class="form-label">Price</label>
+        <input type="number" placeholder="1200" name="Listing[price]" class="form-control" min="1000" required /> 
+         <div class="invalid-feedback">Price should be valid(min-1000)</div>
+        </div>
+        
+        <div class="mb-3 col-md-8">
+         <label for="country" class="form-label">Country</label>
+        <input type="text" placeholder="India" name="Listing[country]" class="form-control" required />
+         <div class="invalid-feedback">Country should be valid</div>
+        </div>
+        </div>
+
+        <div class="mb-3">
+         <label for="location" class="form-label">Location</label>
+        <input type="text" placeholder="Patna,Bihar" name="Listing[location]" class="form-control" required />
+         <div class="invalid-feedback">Description should be valid</div>
+        </div>
+       <button class="btn btn-dark add-btn mt-3">Add</button>
+        <br /> <br />
+    </form>
+    </div>
+    </div>
+ <script src="/js/limit.js"></script>
+</body>
+</html>

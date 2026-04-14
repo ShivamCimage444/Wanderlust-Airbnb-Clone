@@ -1,0 +1,68 @@
+<% layout("/layouts/boilerplate") %>
+<body>
+    <div class="row mt-3">
+        <div class="col-8 offset-2">
+    <form action="/listings/<%= listing._id %>?_method=PUT" method="post" enctype="multipart/form-data" novalidate class="needs-validation">
+        <h3>Update your Listing</h3>
+        <div class="mb-3">
+         <label for="title" class="form-label">Title</label>
+        <input type="text" value="<%= listing.title %>" name="Listing[title]" class="form-control" required>
+        <div class="invalid-feedback">Title should be valid</div>
+        </div>
+        <div class="mb-3">
+         <label for="description" class="form-label">Description</label>
+        <textarea name="Listing[description]" cols="30" rows="3" class="form-control" required><%= listing.description %></textarea>
+         <div class="invalid-feedback">Description should be valid</div>
+         Original listing Image
+        </div>
+           <div class="mb-3">
+           <img src="<%= listing.image.url %>"alt="Listing Image"class="img-thumbnail"style="width: 250px; height: auto;">
+          </div>
+        <div class="mb-3">
+        <label class="form-label">Replace Image (optional)</label>
+         <input type="file" name="image" id="imageInput"class="form-control"accept="image/*">
+         <small class="text-danger d-none" id="imageError"></small>
+        </div>
+        <div class="mb-3">
+        <label class="form-label">Choose Category</label>
+        <select name="categoryKey" class="form-control">
+          <option value="trending" <%= listing.category?.key === "trending" ? "selected" : "" %>>
+            Trending
+          </option>
+         <option value="villa" <%= listing.category?.key === "villa" ? "selected" : "" %>>
+             Villa
+        </option>
+        <option value="popular" <%= listing.category?.key === "popular" ? "selected" : "" %>>
+         Popular
+        </option>
+        <option value="budget" <%= listing.category?.key === "budget" ? "selected" : "" %>>
+            Budget
+        </option>
+      </select>
+      </div>
+
+        <div class="row">
+        <div class="mb-3 col-md-4">
+         <label for="price" class="form-label" >Price</label>
+        <input type="number"  value="<%= listing.price %>" name="Listing[price]" class="form-control" min="1000" required> 
+         <div class="invalid-feedback">Price should be valid(min-1000)</div>
+        </div>
+        <div class="mb-3 col-md-8">
+         <label for="country" class="form-label">Country</label>
+         <input type="text"  value="<%= listing.country %>" name="Listing[country]"class="form-control" required>
+          <div class="invalid-feedback">Country should be valid</div>
+        </div>
+        </div>
+
+        <div class="mb-3">
+         <label for="location" class="form-label">Location</label>
+         <input type="text"  value="<%= listing.location %>" name="Listing[location]"class="form-control" required>
+         <div class="invalid-feedback">Location should be valid</div>
+        </div>
+        <button class="btn btn-dark edit-btn mt-3">Edit</button>
+        <br /> <br />
+    </form>
+    </div>
+    </div>
+     <script src="/js/limit.js"></script>
+</body>

@@ -1,0 +1,326 @@
+<% layout("/layouts/boilerplate") %>
+
+<style>
+  /* ===== GLOBAL ===== */
+  body {
+    background: linear-gradient(135deg, #f5f7fb, #eef2ff);
+    color: #0f172a;
+  }
+
+  .container {
+    max-width: 1250px;
+  }
+
+  /* ===== HEADER ===== */
+  h2 {
+    font-weight: 700;
+    letter-spacing: 0.4px;
+  }
+
+  .badge.bg-dark {
+    background: linear-gradient(135deg, #0f172a, #334155) !important;
+    padding: 10px 16px;
+    border-radius: 999px;
+    font-weight: 500;
+  }
+
+  /* ===== CARDS ===== */
+  .card {
+    border: none;
+    border-radius: 18px;
+    background: #ffffff;
+    box-shadow: 0 12px 30px rgba(15, 23, 42, 0.08);
+    overflow: hidden;
+  }
+
+  .card-header {
+    font-size: 1rem;
+    font-weight: 600;
+    padding: 18px 22px;
+    border-bottom: none;
+  }
+
+  .bg-primary {
+    background: linear-gradient(135deg,  #334155,  #334155) !important;
+  }
+
+  .bg-secondary {
+    background: linear-gradient(135deg, #334155, #334155) !important;
+  }
+
+  /* ===== TABLE ===== */
+  table {
+    margin-bottom: 0;
+  }
+
+  thead th {
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.7px;
+    background-color: #f1f5f9 !important;
+    color: #334155;
+    text-align: center;
+    padding: 14px;
+  }
+
+  tbody td {
+    vertical-align: middle;
+    text-align: center;
+    padding: 14px;
+    font-size: 0.9rem;
+  }
+
+  tbody tr {
+    transition: all 0.2s ease;
+  }
+
+  tbody tr:hover {
+    background-color: #eef2ff;
+    transform: scale(1.003);
+  }
+
+  /* ===== BADGES ===== */
+  .badge {
+    font-size: 0.7rem;
+    padding: 6px 12px;
+    border-radius: 999px;
+    font-weight: 500;
+  }
+
+  .bg-success {
+    background: linear-gradient(135deg, #16a34a, #22c55e) !important;
+  }
+
+  .bg-warning {
+    background: linear-gradient(135deg, #f59e0b, #fbbf24) !important;
+    color: #0f172a !important;
+  }
+
+  .bg-danger {
+    background: linear-gradient(135deg, #dc2626, #ef4444) !important;
+  }
+
+  .bg-info {
+    background: linear-gradient(135deg, #38bdf8, #0ea5e9) !important;
+    color: #0f172a;
+  }
+
+  /* ===== BUTTONS ===== */
+  .btn {
+    font-size: 0.75rem;
+    padding: 6px 14px;
+    border-radius: 12px;
+    transition: all 0.2s ease;
+  }
+
+  .btn-warning {
+    background: linear-gradient(135deg, #f59e0b, #fbbf24);
+    border: none;
+    color: #0f172a;
+  }
+
+  .btn-secondary {
+    background: linear-gradient(135deg, #334155, #475569);
+    border: none;
+  }
+
+  .btn-success {
+    background: linear-gradient(135deg, #16a34a, #22c55e);
+    border: none;
+  }
+
+  .btn-danger {
+    background: linear-gradient(135deg, #dc2626, #ef4444);
+    border: none;
+  }
+
+  .btn-info {
+    background: linear-gradient(135deg, #38bdf8, #0ea5e9);
+    border: none;
+    color: #0f172a;
+  }
+
+  .btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 14px rgba(0,0,0,0.15);
+  }
+
+  /* ===== ACTION SPACING ===== */
+  td form,
+  td a {
+    margin: 2px;
+  }
+
+  /* ===== PAGINATION ===== */
+  .pagination {
+    margin-top: 30px;
+  }
+
+  .pagination .page-link {
+    border-radius: 12px;
+    margin: 0 4px;
+    padding: 8px 14px;
+    color: #334155;
+    font-weight: 500;
+  }
+
+  .pagination .page-item.active .page-link {
+    background: linear-gradient(135deg, #4f46e5, #6366f1);
+    border: none;
+  }
+</style>
+
+<div class="container my-5">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>👥 User Management</h2>
+    <span class="badge bg-dark fs-6">Admin Panel</span>
+  </div>
+
+  <!-- ================= OWNERS ================= -->
+  <div class="card mb-5">
+    <div class="card-header bg-primary text-white">
+       Owners
+    </div>
+
+    <div class="card-body p-0">
+      <% if (owners.length === 0) { %>
+        <p class="text-muted p-3">No owners found.</p>
+      <% } else { %>
+        <div class="table-responsive">
+          <table class="table table-hover align-middle">
+            <thead>
+              <tr>
+                <th>User</th>
+                <th>Email</th>
+                <th>Status</th>
+                <th>Owner Access</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% owners.forEach(user => { %>
+                <tr>
+                  <td>
+                    <strong><%= user.username %></strong><br>
+                    <span class="badge bg-info">Owner</span>
+                  </td>
+                  <td><%= user.email %></td>
+                  <td>
+                    <% if (user.isBlocked) { %>
+                      <span class="badge bg-danger">Blocked</span>
+                    <% } else { %>
+                      <span class="badge bg-success">Active</span>
+                    <% } %>
+                  </td>
+                  <td>
+                    <% if (user.isOwnerBlocked) { %>
+                      <span class="badge bg-warning text-dark">Owner Blocked</span>
+                    <% } else { %>
+                      <span class="badge bg-success">Allowed</span>
+                    <% } %>
+                  </td>
+                  <td>
+                    <form method="POST" action="/admin/users/<%= user._id %>/block?_method=PUT" class="d-inline">
+                      <button class="btn btn-warning"><%= user.isBlocked ? "Unblock" : "Block" %></button>
+                    </form>
+                    <form method="POST" action="/admin/users/<%= user._id %>/owner-block?_method=PUT" class="d-inline">
+                      <button class="btn btn-secondary"><%= user.isOwnerBlocked ? "Unblock Owner" : "Block Owner" %></button>
+                    </form>
+                    <a href="/admin/users/<%= user._id %>/view" class="btn btn-info">View</a>
+                    <form method="POST" action="/admin/users/<%= user._id %>?_method=DELETE" class="d-inline"
+                      onsubmit="return confirm('Deleting owner will remove all listings. Continue?')">
+                      <button class="btn btn-danger">Delete</button>
+                    </form>
+                  </td>
+                </tr>
+              <% }) %>
+            </tbody>
+          </table>
+        </div>
+      <% } %>
+    </div>
+  </div>
+
+  <!-- ================= USERS ================= -->
+  <div class="card">
+    <div class="card-header bg-secondary text-white">
+      👤 Users
+    </div>
+
+    <div class="card-body p-0">
+      <% if (normalUsers.length === 0) { %>
+        <p class="text-muted p-3">No users found.</p>
+      <% } else { %>
+        <div class="table-responsive">
+          <table class="table table-hover align-middle">
+            <thead>
+              <tr>
+                <th>User</th>
+                <th>Email</th>
+                <th>Status</th>
+                <th>Create Listing</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% normalUsers.forEach(user => { %>
+                <tr>
+                  <td>
+                    <strong><%= user.username %></strong><br>
+                    <span class="badge bg-secondary">User</span>
+                  </td>
+                  <td><%= user.email %></td>
+                  <td>
+                    <% if (user.isBlocked) { %>
+                      <span class="badge bg-danger">Blocked</span>
+                    <% } else { %>
+                      <span class="badge bg-success">Active</span>
+                    <% } %>
+                  </td>
+                  <td>
+                    <% if (user.canCreateListing) { %>
+                      <span class="badge bg-success">Approved</span>
+                    <% } else { %>
+                      <span class="badge bg-warning text-dark">Not Approved</span>
+                    <% } %>
+                  </td>
+                  <td>
+                    <form method="POST" action="/admin/users/<%= user._id %>/block?_method=PUT" class="d-inline">
+                      <button class="btn btn-warning"><%= user.isBlocked ? "Unblock" : "Block" %></button>
+                    </form>
+                    <% if (!user.canCreateListing) { %>
+                      <form method="POST" action="/admin/users/<%= user._id %>/approve-owner?_method=PUT" class="d-inline">
+                        <button class="btn btn-success">Allow Listing</button>
+                      </form>
+                    <% } %>
+                    <a href="/admin/users/<%= user._id %>/view" class="btn btn-info">View</a>
+                    <form method="POST" action="/admin/users/<%= user._id %>?_method=DELETE" class="d-inline"
+                      onsubmit="return confirm('Are you sure you want to delete this user?')">
+                      <button class="btn btn-danger">Delete</button>
+                    </form>
+                  </td>
+                </tr>
+              <% }) %>
+            </tbody>
+          </table>
+        </div>
+      <% } %>
+    </div>
+  </div>
+</div>
+
+<nav class="mt-4">
+  <ul class="pagination justify-content-center">
+    <% if (currentPage > 1) { %>
+      <li class="page-item"><a class="page-link" href="?page=<%= currentPage - 1 %>">Previous</a></li>
+    <% } %>
+    <% for (let i = 1; i <= totalPages; i++) { %>
+      <li class="page-item <%= i === currentPage ? 'active' : '' %>">
+        <a class="page-link" href="?page=<%= i %>"><%= i %></a>
+      </li>
+    <% } %>
+    <% if (currentPage < totalPages) { %>
+      <li class="page-item"><a class="page-link" href="?page=<%= currentPage + 1 %>">Next</a></li>
+    <% } %>
+  </ul>
+</nav>

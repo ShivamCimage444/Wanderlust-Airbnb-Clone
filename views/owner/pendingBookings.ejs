@@ -1,0 +1,156 @@
+<% layout("/layouts/boilerplate") %>
+
+<style>
+  body {
+    background: #f4f6fb;
+    font-family: 'Inter', sans-serif;
+  }
+
+  h3 {
+    font-weight: 700;
+    margin-bottom: 30px;
+    color: #1f2937;
+  }
+
+  h5 {
+    font-weight: 600;
+    margin-bottom: 20px;
+    color: #374151;
+  }
+
+  .booking-card {
+    background: #ffffff;
+    border-radius: 16px;
+    padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+    transition: 0.3s ease;
+  }
+
+  .booking-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 35px rgba(0,0,0,0.08);
+  }
+
+  .booking-info p {
+    margin-bottom: 6px;
+    font-size: 14px;
+    color: #4b5563;
+  }
+
+  .booking-info strong {
+    color: #111827;
+  }
+
+  .actions .btn {
+    border-radius: 8px;
+    font-size: 13px;
+  }
+
+  .status-badge {
+    background: #3b82f6;
+    color: white;
+    font-size: 12px;
+    padding: 5px 12px;
+    border-radius: 999px;
+  }
+
+  .empty-box {
+    background: #ffffff;
+    padding: 30px;
+    border-radius: 12px;
+    text-align: center;
+    color: #6b7280;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.04);
+  }
+</style>
+
+<div class="container my-5">
+
+  <h3 style="color: #fe424d;">Pending & Approved Bookings</h3>
+
+  <% 
+    const pending = bookings.filter(b => b.status === "pending");
+    const approved = bookings.filter(b => b.status === "approved");
+  %>
+
+  <!-- ================= PENDING BOOKINGS ================= -->
+  <h5>🕒 Pending Requests</h5>
+
+  <% if (pending.length === 0) { %>
+    <div class="empty-box">No pending booking requests.</div>
+  <% } else { %>
+
+    <% pending.forEach(b => { %>
+      <div class="booking-card row align-items-center">
+
+        <div class="col-md-8 booking-info">
+          <p><strong>Guest:</strong> <%= b.user.username %></p>
+          <p><strong>Listing:</strong> <%= b.listing.title %></p>
+          <p><strong>Dates:</strong>
+            <%= b.startDate.toDateString() %> →
+            <%= b.endDate.toDateString() %>
+          </p>
+        </div>
+
+        <div class="col-md-4 actions text-md-end mt-3 mt-md-0 d-flex gap-2 justify-content-md-end">
+          <form action="/bookings/<%= b._id %>/approve" method="POST">
+            <button class="btn btn-sm btn-success">Approve</button>
+          </form>
+
+          <form action="/bookings/<%= b._id %>/reject" method="POST">
+            <button class="btn btn-sm btn-outline-danger">Reject</button>
+          </form>
+        </div>
+
+      </div>
+    <% }) %>
+
+  <% } %>
+
+
+  <!-- ================= APPROVED BOOKINGS ================= -->
+  <h5 class="mt-5">✅ Approved (Waiting for Payment)</h5>
+
+  <% if (approved.length === 0) { %>
+    <div class="empty-box">No approved bookings waiting for payment.</div>
+  <% } else { %>
+
+    <% approved.forEach(b => { %>
+      <div class="booking-card row align-items-center">
+
+        <div class="col-md-7 booking-info">
+          <p><strong>Guest:</strong> <%= b.user.username %></p>
+          <p><strong>Listing:</strong> <%= b.listing.title %></p>
+          <p><strong>Dates:</strong>
+            <%= b.startDate.toDateString() %> →
+            <%= b.endDate.toDateString() %>
+          </p>
+          <span class="status-badge">Waiting for Payment</span>
+        </div>
+
+        <div class="col-md-5 actions text-md-end mt-3 mt-md-0 d-flex gap-2 justify-content-md-end">
+
+          <a
+            href="/bookings/owner/<%= b._id %>/details"
+            class="btn btn-sm btn-outline-primary">
+            View
+          </a>
+
+          <form
+            action="/bookings/owner/<%= b._id %>/cancel"
+            method="POST"
+            onsubmit="return confirm('Cancel this approved booking?')">
+            <button class="btn btn-sm btn-outline-danger">
+              Cancel
+            </button>
+          </form>
+
+        </div>
+
+      </div>
+    <% }) %>
+
+  <% } %>
+
+</div>
