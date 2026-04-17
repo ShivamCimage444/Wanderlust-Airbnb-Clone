@@ -27,14 +27,14 @@ module.exports.signup = async (req, res) => {
             return res.redirect("/signup");
         }
 
-        // 🔐 Hash password
+        //  Hash password
         const salt = await bcrypt.genSalt(12);
         const hash = await bcrypt.hash(password, salt);
 
-        // 🔑 Generate token
+        //  Generate token
         const token = crypto.randomBytes(32).toString("hex");
 
-        // 💾 Save user (WITH TOKEN)
+        // Save user (WITH TOKEN)
         const user = new User({
             username,
             email,
@@ -45,7 +45,7 @@ module.exports.signup = async (req, res) => {
 
         await user.save();
 
-        // 📧 Send email
+        //  Send email
         
         const verifyURL = `${process.env.BASE_URL}/verify/${token}`;
 
