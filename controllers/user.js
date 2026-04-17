@@ -40,7 +40,8 @@ module.exports.signup = async (req, res) => {
             email,
             salt,
             hash,
-            verifyToken: token   // ✅ IMPORTANT
+            verifyToken: token ,
+            verifyTokenExpiry: Date.now() + 3600000 // 1 hour  // ✅ IMPORTANT
         });
 
         await user.save();
@@ -51,7 +52,7 @@ module.exports.signup = async (req, res) => {
 
         try {
     await transporter.sendMail({
-        from: '"Wanderlust App" <shivamji2310@gmail.com>',
+        from: `"Wanderlust App" <${process.env.EMAIL_USER}>`,
         to: user.email,
         subject: "Verify your account",
         html: `
